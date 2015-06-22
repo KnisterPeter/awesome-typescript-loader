@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import { CompilerOptions, TypeScriptCompilationError, State } from './host';
 import { Resolver, ResolutionError } from './deps';
 import * as helpers from './helpers';
+import { generateDoc } from './doc/doc';
 
 var loaderUtils = require('loader-utils');
 
@@ -257,6 +258,14 @@ function compiler(webpack: WebPack, text: string): void {
 
             var sourceFilename = loaderUtils.getRemainingRequest(webpack);
             var current = loaderUtils.getCurrentRequest(webpack);
+
+            generateDoc(
+                fileName,
+                state.program.getSourceFile(fileName),
+                state.program,
+                state.ts
+            );
+
             var sourceMap = JSON.parse(result.sourceMap);
             sourceMap.sources = [sourceFilename];
             sourceMap.file = current;

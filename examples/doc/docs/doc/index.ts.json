@@ -1,0 +1,106 @@
+{
+    "pkg": "doc",
+    "relativePath": "index.ts",
+    "sourceFile": {
+        "pos": 0,
+        "end": 45,
+        "text": "interface TestInterface {\n    field: string\n}",
+        "bindDiagnostics": [],
+        "languageVersion": 1,
+        "fileName": "/Users/panferov/Workspace/my/awesome-typescript-loader/examples/doc/index.ts",
+        "flags": 0,
+        "referencedFiles": [],
+        "amdDependencies": [],
+        "statements": [
+            {
+                "pos": 0,
+                "end": 45,
+                "name": {
+                    "pos": 9,
+                    "end": 23,
+                    "text": "TestInterface",
+                    "parent": "~statements~0"
+                },
+                "members": [
+                    {
+                        "pos": 25,
+                        "end": 43,
+                        "name": {
+                            "pos": 25,
+                            "end": 35,
+                            "text": "field",
+                            "parent": "~statements~0~name~members~0"
+                        },
+                        "type": {
+                            "pos": 36,
+                            "end": 43,
+                            "parent": "~statements~0~name~members~0"
+                        },
+                        "parent": "~statements~0",
+                        "symbol": {
+                            "flags": 4,
+                            "name": "field",
+                            "declarations": [
+                                "~statements~0~name~members~0"
+                            ],
+                            "valueDeclaration": "~statements~0~name~members~0",
+                            "parent": {
+                                "flags": 64,
+                                "name": "TestInterface",
+                                "declarations": [
+                                    "~statements~0"
+                                ],
+                                "members": {
+                                    "field": "~statements~0~name~members~0~name~symbol"
+                                },
+                                "id": 10
+                            },
+                            "id": 11
+                        }
+                    }
+                ],
+                "parent": "~sourceFile",
+                "symbol": "~statements~0~name~members~0~name~symbol~parent"
+            }
+        ],
+        "endOfFileToken": {
+            "pos": 45,
+            "end": 45,
+            "parent": "~sourceFile"
+        },
+        "nodeCount": 7,
+        "identifierCount": 2,
+        "identifiers": {
+            "TestInterface": "TestInterface",
+            "field": "field"
+        },
+        "parseDiagnostics": [],
+        "version": "1",
+        "scriptSnapshot": {
+            "text": "interface TestInterface {\n    field: string\n}"
+        },
+        "nameTable": "~endOfFileToken~identifiers",
+        "locals": {
+            "TestInterface": "~statements~0~name~members~0~name~symbol~parent"
+        },
+        "nextContainer": "~statements~0",
+        "symbolCount": 2,
+        "classifiableNames": {
+            "TestInterface": "TestInterface"
+        },
+        "id": 1,
+        "lineMap": [
+            0,
+            26,
+            44
+        ]
+    },
+    "types": [
+        {
+            "checker": {},
+            "flags": 2048,
+            "id": 25,
+            "symbol": "~statements~0~name~members~0~name~symbol~parent"
+        }
+    ]
+}

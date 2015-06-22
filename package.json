@@ -25,12 +25,15 @@
   "homepage": "https://github.com/s-panferov/awesome-typescript-loader",
   "dependencies": {
     "bluebird": "^2.7.1",
+    "circular-json": "^0.1.6",
     "loader-utils": "^0.2.6",
     "lodash": "^3.3.0",
     "object-assign": "^2.0.0",
-    "typescript": "1.5.0-beta"
+    "typescript": "git+https://github.com/Microsoft/TypeScript.git#master"
   },
   "devDependencies": {
+    "closest-package": "^1.0.0",
+    "fs-extra": "^0.20.0",
     "git-hooks": "0.0.10",
     "grunt": "^0.4.5",
     "grunt-bump": "^0.3.1",
@@ -40,6 +43,8 @@
     "grunt-conventional-changelog": "^1.2.1",
     "grunt-shell": "^1.1.2",
     "grunt-ts": "^3.0.0",
-    "load-grunt-tasks": "^0.6.0"
+    "load-grunt-tasks": "^0.6.0",
+    "mkpath": "^0.1.0",
+    "node-fs-extra": "^0.8.1"
   }
 }
