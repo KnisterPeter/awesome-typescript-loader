@@ -25,7 +25,6 @@
   "homepage": "https://github.com/s-panferov/awesome-typescript-loader",
   "dependencies": {
     "bluebird": "^2.7.1",
-    "circular-json": "^0.1.6",
     "loader-utils": "^0.2.6",
     "lodash": "^3.3.0",
     "object-assign": "^2.0.0",
@@ -45,6 +44,7 @@
     "grunt-ts": "^3.0.0",
     "load-grunt-tasks": "^0.6.0",
     "mkpath": "^0.1.0",
-    "node-fs-extra": "^0.8.1"
+    "node-fs-extra": "^0.8.1",
+    "refify": "^1.0.0"
   }
 }

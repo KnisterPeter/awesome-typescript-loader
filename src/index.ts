@@ -9,7 +9,7 @@ import * as _ from 'lodash';
 import { CompilerOptions, TypeScriptCompilationError, State } from './host';
 import { Resolver, ResolutionError } from './deps';
 import * as helpers from './helpers';
-import { generateDoc } from './doc/doc';
+import { generateDoc, DocRegistry } from './doc/doc';
 
 var loaderUtils = require('loader-utils');
 
@@ -33,6 +33,7 @@ interface CompilerInstance {
     compiledFiles: {[key:string]: boolean};
     options: CompilerOptions;
     externalsInvoked: boolean;
+    docRegistry: DocRegistry
 }
 
 function getRootCompiler(compiler) {
@@ -158,6 +159,10 @@ function ensureInstance(webpack: WebPack, options: CompilerOptions, instanceName
     compiler.plugin('after-compile', function(compilation, callback) {
 
         var instance: CompilerInstance = resolveInstance(compilation.compiler, instanceName);
+
+        instance.docRegistry.writeDocs();
+        instance.docRegistry.writeRegistryModule();
+
         var state = instance.tsState;
         var diagnostics = state.ts.getPreEmitDiagnostics(state.program);
         var emitError = (err) => {
@@ -185,7 +190,8 @@ function ensureInstance(webpack: WebPack, options: CompilerOptions, instanceName
         tsState,
         compiledFiles: {},
         options,
-        externalsInvoked: false
+        externalsInvoked: false,
+        docRegistry: new DocRegistry()
     }
 }
 
@@ -259,12 +265,14 @@ function compiler(webpack: WebPack, text: string): void {
             var sourceFilename = loaderUtils.getRemainingRequest(webpack);
             var current = loaderUtils.getCurrentRequest(webpack);
 
-            generateDoc(
+            let doc = generateDoc(
                 fileName,
                 state.program.getSourceFile(fileName),
                 state.program,
                 state.ts
             );
+
+            instance.docRegistry.addDoc(fileName, doc);
 
             var sourceMap = JSON.parse(result.sourceMap);
             sourceMap.sources = [sourceFilename];
