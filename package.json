@@ -31,6 +31,7 @@
     "typescript": "git+https://github.com/Microsoft/TypeScript.git#master"
   },
   "devDependencies": {
+    "circular-json": "^0.1.6",
     "closest-package": "^1.0.0",
     "fs-extra": "^0.20.0",
     "git-hooks": "0.0.10",
@@ -42,9 +43,11 @@
     "grunt-conventional-changelog": "^1.2.1",
     "grunt-shell": "^1.1.2",
     "grunt-ts": "^3.0.0",
+    "jsan": "^2.0.4",
     "load-grunt-tasks": "^0.6.0",
     "mkpath": "^0.1.0",
     "node-fs-extra": "^0.8.1",
+    "node-uuid": "^1.4.3",
     "refify": "^1.0.0"
   }
 }

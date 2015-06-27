@@ -9,60 +9,56 @@ import Node = ts.Node;
 import Type = ts.Type;
 import Symbol = ts.Symbol;
 
-let tsInst: typeof ts = require('typescript');
-let refify = require('refify');
-
 let fse = require('fs-extra');
 let closest = require('closest-package');
+var crypto = require('crypto');
 
-export interface DocMap {
-    [key: string]: Doc
+export interface IDocMap {
+    [key: string]: IDoc
+}
+
+export interface IDocRegistry {
+    mainPackage: string;
+    files: IDocMap
 }
 
 export class DocRegistry {
-    docs: DocMap = {}
+    docs: IDocMap = {};
 
     addDoc(fileName, doc: Doc) {
         this.docs[fileName] = doc;
     }
 
-    writeDocs() {
+    writeDocs(dir: string) {
+        fse.ensureDirSync(dir);
         _.forEach(this.docs, (doc) => {
-            fs.writeFileSync(doc.fileInfo.absoluteMeta, refify.stringify(doc, (key, value) => {
-                if (key == 'parent') {
-                    return undefined
-                } else {
-                    return value
-                }
-            }, 4));
+            let metaPath = path.join(dir, doc.fileInfo.metaName);
+            fs.writeFileSync(metaPath, JSON.stringify(doc, null, 4));
         });
+
+        this.writeRegistryModule(dir)
     }
 
-    generateRegistryModule(): string {
-        var buf = 'module.exports = {\n';
+    generateRegistryModule(dir: string): string {
+        var buf = `
+module.exports = {\n
+    mainPackage: '${extractPackage(dir).info.name}',
+    files: {
+        `;
 
         _.forEach(this.docs, (doc) => {
-            buf += `    '${doc.fileInfo.relativeOrigin}': require('./${path.relative('docs', doc.fileInfo.absoluteMeta)}'),\n`
+            buf += `    '${doc.fileInfo.metaName}': require('./${ doc.fileInfo.metaName }'),\n`
         });
 
-        buf += '}';
+        buf += '}}';
 
         return buf;
     }
 
-
-    writeRegistryModule() {
-        let registryModule = this.generateRegistryModule();
+    writeRegistryModule(dir: string) {
+        let registryModule = this.generateRegistryModule(dir);
         fs.writeFileSync('./docs/registry.js', registryModule);
     }
-
-}
-
-export interface IDocFile {
-    absoluteOrigin: string;
-    absoluteMeta: string;
-    relativeOrigin: string;
-    relativeMeta: string;
 }
 
 export interface IPackage {
@@ -78,84 +74,65 @@ export function extractPackage(fileName: string): IPackage {
     }
 }
 
-export function getDocDirForPackage(pkg: IPackage) {
-    return path.join(
-        process.cwd(),
-        'docs',
-        pkg.info.name
-    )
+export interface IDocFile {
+    relativeToOrigin: string;
+    relativeToPackage: string;
+    metaName: string;
 }
 
 export function getDocFilePath(fileName: string, pkg: IPackage): IDocFile {
-    let relativeOrigin = path.relative(pkg.path, fileName);
-    let absoluteOrigin = path.join(getDocDirForPackage(pkg), relativeOrigin);
-    let absoluteMeta = `${absoluteOrigin}.docscript.json`;
-    let relativeMeta = path.relative(pkg.path, absoluteMeta);
+    let relativeToOrigin = path.relative(process.cwd(), fileName);
+
+    var shasum = crypto.createHash('sha1');
+    shasum.update(relativeToOrigin);
+
+    let metaName = shasum.digest('hex') + '.json';
+    let relativeToPackage = path.relative(pkg.path, fileName);
 
     return {
-        absoluteMeta,
-        relativeMeta,
-        absoluteOrigin,
-        relativeOrigin,
+        metaName,
+        relativeToOrigin,
+        relativeToPackage
     }
 }
 
+export interface IDocPkgInfo {
+    name: string;
+    version: string;
+    description: string;
+}
 
-class Doc {
-    sourceFile: SourceFile;
-    pkg: string;
+export interface IDoc {
+    text: string;
+    pkg: IDocPkgInfo;
     fileInfo: IDocFile;
-    types: Type[] = [];
+}
 
-    constructor(sourceFile: SourceFile, pkg: string, fileInfo: IDocFile) {
-        this.sourceFile = sourceFile;
-        this.pkg = pkg;
+class Doc implements IDoc {
+    text: string;
+    pkg: IDocPkgInfo;
+    fileInfo: IDocFile;
+
+    constructor(sourceFile: SourceFile, pkg: IPackage, fileInfo: IDocFile) {
+        this.text = sourceFile.text;
+        this.pkg = {
+            name: pkg.info.name,
+            version: pkg.info.version,
+            description: pkg.info.description,
+        };
         this.fileInfo = fileInfo;
     }
 
-    addType(type: Type) {
-        this.types.push(type);
-    }
-
     toJSON() {
-        return {
-            pkg: this.pkg,
-            relativePath: this.fileInfo.relativeOrigin,
-            //sourceFile: this.sourceFile,
-            types: this.types
-        }
+        var { text, pkg, fileInfo } = this;
+        return { pkg, fileInfo, text };
     }
 }
 
-interface VisitContext {
-    typeChecker: TypeChecker;
-    tsInst: typeof ts;
-    doc: Doc
-}
-
-export function processSourceFile(source: SourceFile, ctx: VisitContext) {
-    function visitNode(node: Node) {
-        switch (node.kind) {
-            case SyntaxKind.InterfaceDeclaration:
-                visitInterface(node, ctx)
-        }
-        ctx.tsInst.forEachChild(node, visitNode);
-    }
-    visitNode(source);
-}
-
-export function visitInterface(node: Node, ctx: VisitContext) {
-    ctx.doc.addType(ctx.typeChecker.getTypeAtLocation(node))
-}
-
-export function generateDoc(fileName: string, source: SourceFile, program: ts.Program, tsInst: typeof ts): Doc {
+export function generateDoc(fileName: string, source: SourceFile): Doc {
     let pkg = extractPackage(fileName);
     let docFilePath = getDocFilePath(fileName, pkg);
-    fse.ensureDirSync(path.dirname(docFilePath.absoluteOrigin));
 
-    let typeChecker = program.getTypeChecker();
-    let doc = new Doc(source, pkg.info.name, docFilePath);
-
-    processSourceFile(source, { typeChecker, tsInst, doc });
+    let doc = new Doc(source, pkg, docFilePath);
     return doc;
 }

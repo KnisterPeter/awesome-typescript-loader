@@ -160,9 +160,6 @@ function ensureInstance(webpack: WebPack, options: CompilerOptions, instanceName
 
         var instance: CompilerInstance = resolveInstance(compilation.compiler, instanceName);
 
-        instance.docRegistry.writeDocs();
-        instance.docRegistry.writeRegistryModule();
-
         var state = instance.tsState;
         var diagnostics = state.ts.getPreEmitDiagnostics(state.program);
         var emitError = (err) => {
@@ -171,10 +168,19 @@ function ensureInstance(webpack: WebPack, options: CompilerOptions, instanceName
 
         var phantomImports = [];
         Object.keys(state.files).forEach((fileName) => {
+            console.log(`Generate doc for ${fileName}`);
+
+            let doc = generateDoc(
+                fileName,
+                state.program.getSourceFile(fileName)
+            );
+            instance.docRegistry.addDoc(fileName, doc);
             if (!instance.compiledFiles[fileName]) {
                 phantomImports.push(fileName)
             }
         });
+
+        instance.docRegistry.writeDocs('docs');
 
         instance.compiledFiles = {};
         compilation.fileDependencies.push.apply(compilation.fileDependencies, phantomImports);
@@ -264,15 +270,6 @@ function compiler(webpack: WebPack, text: string): void {
 
             var sourceFilename = loaderUtils.getRemainingRequest(webpack);
             var current = loaderUtils.getCurrentRequest(webpack);
-
-            let doc = generateDoc(
-                fileName,
-                state.program.getSourceFile(fileName),
-                state.program,
-                state.ts
-            );
-
-            instance.docRegistry.addDoc(fileName, doc);
 
             var sourceMap = JSON.parse(result.sourceMap);
             sourceMap.sources = [sourceFilename];
