@@ -89,6 +89,10 @@ export function getDocFilePath(fileName: string, pkg: IPackage): IDocFile {
     let metaName = shasum.digest('hex') + '.json';
     let relativeToPackage = path.relative(pkg.path, fileName);
 
+    if (!/^(\.|\/)/.test(relativeToPackage)) {
+        relativeToPackage = '/' + relativeToPackage
+    }
+
     return {
         metaName,
         relativeToOrigin,
